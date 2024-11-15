@@ -1,0 +1,30 @@
+# Keep track of whether the file has been cleared initially
+set file_cleared 0
+
+proc write_to_file {message} {
+    global file_cleared
+
+    if {[info exists ::env(ICPRO_DIR)] && [info exists ::env(STEP)]} {
+        set output_dir "$::env(ICPRO_DIR)/innovus/result"
+        set output_file "$output_dir/$::env(STEP).yaml"
+
+        # Ensure the directory exists
+        if {![file isdirectory $output_dir]} {
+            file mkdir $output_dir
+        }
+
+        # Clear the file content if it hasn't been cleared yet
+        if {!$file_cleared} {
+            set file_id [open $output_file "w"]  ;# Open in write mode to clear contents
+            close $file_id
+            set file_cleared 1  ;# Mark that the file has been cleared
+        }
+
+        # Append the message to the output file
+        set file_id [open $output_file "a"]  ;# Open in append mode for further writes
+        puts $file_id $message
+        close $file_id
+    } else {
+        puts "RI-ERROR: Environment variables ICPRO_DIR or STEP not set"
+    }
+}
